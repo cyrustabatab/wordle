@@ -12,7 +12,9 @@ class Button(pygame.sprite.Sprite):
         text = text_font.render(button_text,True,text_color)
         self.image.blit(text,(button_width//2 - text.get_width()//2,button_height//2 - text.get_height()//2))
 
-
+    
+    def get_bottom(self):
+        return self.rect.bottom
     def clicked_on(self,point):
 
         return self.rect.collidepoint(point)

@@ -11,15 +11,16 @@ import random
 
 class Game:
     
-    SCREEN_HEIGHT = 600
+    SCREEN_HEIGHT = 700
     BGCOLOR = (128,128,128)
     SCREEN_WIDTH = 600
     SQUARE_SIZE = 75
-    BOTTOM_SECTION_HEIGHT= 100
+    BOTTOM_SECTION_HEIGHT= 150
     GAP = 10
     BUTTON_WIDTH = 200
     BUTTON_HEIGHT = 50
     FPS = 30
+    TEXT_DISPLAY_TIME = 1000
     WORDS_FILE = "words.txt"
     FONT = pygame.font.SysFont("calibri",40)
 
@@ -36,14 +37,28 @@ class Game:
         self._create_board()
         self._load_words()
         self._choose_random_word()
+        self._create_text()
+        self.show_text = False
+        self.text = None
+
         self.current_row =self.current_col =  0
         self.word_typed = [None] * 5
     
+    def _create_text(self):
+        
+
+        texts = ('TRY AGAIN',"MISSING LETTERS","INVALID WORD") 
+        
+        self.text_renders  = {}
+        for text in texts:
+            text_image = self.FONT.render(text,True,RED)
+            text_rect = text_image.get_rect(center=(self.screen_width//2,self.submit_button.sprite.get_bottom() + self.GAP + text_image.get_height()//2))
+            self.text_renders[text] = (text_image,text_rect)
+        self.TEXT_EVENT = pygame.USEREVENT + 2
 
     def _choose_random_word(self):
 
         self.word_to_guess = random.choice(self.words)
-        print(self.word_to_guess)
     def _create_buttons(self): 
 
         submit_button = Button(self.BUTTON_WIDTH,self.BUTTON_HEIGHT,self.screen_width//2,self.GAP + (self.SQUARE_SIZE + self.GAP) * self.guesses + 50,"SUBMIT",RED,BLACK,self.FONT)
@@ -83,6 +98,9 @@ class Game:
             square.draw(self.screen)
 
         self.submit_button.draw(self.screen)
+        if self.text:
+            self.screen.blit(self.text,self.text_rect)
+
     
 
     def _switch_selection(self):
@@ -91,24 +109,31 @@ class Game:
         self.current_selection.set_current_selection()
     
     def _check_word_typed(self):
+        self.show_text = True
 
-
-        word = ''.join(self.word_typed)
-
-        if word in self.words:
-
-            if word == self.word_to_guess:
-                print('correct')
-            else:
-                print('incorrect')
-
-
-            self.current_row = self.current_row + 1
-            self.current_col = 0
-            self._switch_selection()
+        if not all(value for value in self.word_typed):
+            text_type = 'MISSING LETTERS'
         else:
-            print('not a valid word')
+            word = ''.join(self.word_typed)
 
+            if word in self.words:
+
+                if word == self.word_to_guess:
+                    print('correct')
+                else:
+                    print('incorrect')
+
+
+                self.current_row = self.current_row + 1
+                self.current_col = 0
+                self._switch_selection()
+                text_type = 'TRY AGAIN'
+            else:
+                text_type = 'INVALID WORD'
+            
+        self.text,self.text_rect = self.text_renders[text_type]
+        pygame.time.set_timer(self.TEXT_EVENT,self.TEXT_DISPLAY_TIME,1)
+    
     def play(self):
 
 
@@ -118,7 +143,9 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                if event.type == pygame.KEYDOWN:
+                if self.text and event.type == self.TEXT_EVENT:
+                    self.text = None
+                elif event.type == pygame.KEYDOWN:
                     arrow = backspace = False
 
                     if event.key == pygame.K_RIGHT:
@@ -142,10 +169,7 @@ class Game:
                         direction = -1
                         backspace = True
                     elif event.key == pygame.K_RETURN:
-                        if all(value for value in self.word_typed):
-                            self._check_word_typed()
-                        else:
-                            print('please type out all letters')
+                        self._check_word_typed()
 
 
 
@@ -160,10 +184,7 @@ class Game:
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     point = pygame.mouse.get_pos()
                     if self.submit_button.sprite.clicked_on(point):
-                        if all(value for value in self.word_typed):
-                            self._check_word_typed()
-                        else:
-                            print('please type out all letters')
+                        self._check_word_typed()
 
 
                     
