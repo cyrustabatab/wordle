@@ -40,6 +40,7 @@ class Game:
         self._create_text()
         self.show_text = False
         self.text = None
+        self.game_over = False
 
         self.current_row =self.current_col =  0
         self.word_typed = [None] * 5
@@ -47,7 +48,7 @@ class Game:
     def _create_text(self):
         
 
-        texts = ('TRY AGAIN',"MISSING LETTERS","INVALID WORD") 
+        texts = ('TRY AGAIN',"MISSING LETTERS","INVALID WORD",f"WORD WAS {self.word_to_guess.upper()}") 
         
         self.text_renders  = {}
         for text in texts:
@@ -55,7 +56,14 @@ class Game:
             text_rect = text_image.get_rect(center=(self.screen_width//2,self.submit_button.sprite.get_bottom() + self.GAP + text_image.get_height()//2))
             self.text_renders[text] = (text_image,text_rect)
         self.TEXT_EVENT = pygame.USEREVENT + 2
+    
+    def _reset(self):
+        self.game_over = False
+        self.text = None
 
+        self._choose_random_word()
+        self.current_row =self.current_col =  0
+        self._switch_selection()
     def _choose_random_word(self):
 
         self.word_to_guess = random.choice(self.words)
@@ -110,7 +118,7 @@ class Game:
     
     def _check_word_typed(self):
         self.show_text = True
-
+        skip = False
         if not all(value for value in self.word_typed):
             text_type = 'MISSING LETTERS'
         else:
@@ -120,23 +128,30 @@ class Game:
 
                 if word == self.word_to_guess:
                     print('correct')
+                    self.game_over = True
                 else:
                     print('incorrect')
+                    if self.current_row + 1 ==self.guesses:
+                        text_type = f'WORD WAS {self.word_to_guess.upper()}'
+                        print('here')
+                        self.game_over = True
+                        skip = True
 
-
-                self.current_row = self.current_row + 1
-                self.current_col = 0
-                self._switch_selection()
-                text_type = 'TRY AGAIN'
+                
+                if not skip:
+                    self.current_row = self.current_row + 1
+                    self.word_typed = [None] * 5
+                    self.current_col = 0
+                    self._switch_selection()
+                    text_type = 'TRY AGAIN'
             else:
                 text_type = 'INVALID WORD'
             
         self.text,self.text_rect = self.text_renders[text_type]
-        pygame.time.set_timer(self.TEXT_EVENT,self.TEXT_DISPLAY_TIME,1)
+        if not skip:
+            pygame.time.set_timer(self.TEXT_EVENT,self.TEXT_DISPLAY_TIME,1)
     
     def play(self):
-
-
         while True:
 
             for event in pygame.event.get():
@@ -147,29 +162,32 @@ class Game:
                     self.text = None
                 elif event.type == pygame.KEYDOWN:
                     arrow = backspace = False
-
-                    if event.key == pygame.K_RIGHT:
-                        direction= 1
-                        arrow = True
-                    elif event.key == pygame.K_LEFT:
-                        direction = -1
-                        arrow = True
-                    elif pygame.K_a <= event.key <= pygame.K_z:
-                        key = chr(event.key).upper()
-                        self.current_selection.set_text(key)
-                        self.word_typed[self.current_col] = key
-                        self.current_col = min(self.word_length - 1,self.current_col + 1)
-                        self.current_selection.unset_selection()
-                        self.current_selection = self.board[self.current_row][self.current_col]
-                        self.current_selection.set_current_selection()
-                    elif event.key == pygame.K_BACKSPACE:
-                        self.current_selection.delete()
-                        self.word_typed[self.current_col] = None
-                        arrow = True
-                        direction = -1
-                        backspace = True
+                    
+                    if not self.game_over:
+                        if event.key == pygame.K_RIGHT:
+                            direction= 1
+                            arrow = True
+                        elif event.key == pygame.K_LEFT:
+                            direction = -1
+                            arrow = True
+                        elif pygame.K_a <= event.key <= pygame.K_z:
+                            key = chr(event.key).upper()
+                            self.current_selection.set_text(key)
+                            self.word_typed[self.current_col] = key
+                            self.current_col = min(self.word_length - 1,self.current_col + 1)
+                            self.current_selection.unset_selection()
+                            self.current_selection = self.board[self.current_row][self.current_col]
+                            self.current_selection.set_current_selection()
+                        elif event.key == pygame.K_BACKSPACE:
+                            self.current_selection.delete()
+                            self.word_typed[self.current_col] = None
+                            arrow = True
+                            direction = -1
+                            backspace = True
+                        elif event.key == pygame.K_RETURN:
+                            self._check_word_typed()
                     elif event.key == pygame.K_RETURN:
-                        self._check_word_typed()
+                        self._reset()
 
 
 
