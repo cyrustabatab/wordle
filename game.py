@@ -60,6 +60,7 @@ class Game:
     def _reset(self):
         for square in self.squares:
             square.delete()
+        self.submit_button.sprite.set_original()
         self.game_over = False
         self.text = None
 
@@ -138,7 +139,8 @@ class Game:
                         print('here')
                         self.game_over = True
                         skip = True
-
+            
+                
                 
                 if not skip:
                     self.current_row = self.current_row + 1
@@ -188,6 +190,8 @@ class Game:
                             backspace = True
                         elif event.key == pygame.K_RETURN:
                             self._check_word_typed()
+                            if self.game_over:
+                                self.submit_button.sprite.set_text("PLAY AGAIN")
                     elif event.key == pygame.K_RETURN:
                         self._reset()
 
@@ -205,6 +209,8 @@ class Game:
                     point = pygame.mouse.get_pos()
                     if self.submit_button.sprite.clicked_on(point):
                         self._check_word_typed()
+                        if self.game_over:
+                            self.submit_button.sprite.set_text("PLAY AGAIN")
 
 
                     
