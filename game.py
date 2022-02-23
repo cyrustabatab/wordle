@@ -58,6 +58,8 @@ class Game:
         self.TEXT_EVENT = pygame.USEREVENT + 2
     
     def _reset(self):
+        for square in self.squares:
+            square.delete()
         self.game_over = False
         self.text = None
 

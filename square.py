@@ -27,7 +27,7 @@ class Square(pygame.sprite.Sprite):
         self.current_selection = False
         self.rect = self.image.get_rect(topleft=(topleft_x,topleft_y))
         self.has_text = False
-
+    
 
     def draw(self,screen):
         screen.blit(self.image,self.rect)
