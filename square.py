@@ -33,6 +33,12 @@ class Square(pygame.sprite.Sprite):
         screen.blit(self.image,self.rect)
         if self.current_selection:
             screen.blit(self.trans_rect,self.rect)
+    
+
+    def set_color(self,color):
+        self.image.fill(color)
+        text = self.text
+        self.image.blit(text,(self.image.get_width()//2 - text.get_width()//2,self.image.get_height()//2 - text.get_height()//2))
 
 
     

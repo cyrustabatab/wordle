@@ -3,6 +3,7 @@ pygame.init()
 
 from colors import *
 from square import Square
+from collections import Counter
 from button import Button
 import random
 
@@ -37,6 +38,8 @@ class Game:
         self._create_board()
         self._load_words()
         self._choose_random_word()
+        self.word_to_guess = 'ZIICC'
+        print(self.word_to_guess)
         self._create_text()
         self.show_text = False
         self.text = None
@@ -114,12 +117,42 @@ class Game:
 
     
 
-    def _switch_selection(self):
+    def _switch_selection(self,unset=True):
         self.current_selection.unset_selection()
         self.current_selection = self.board[self.current_row][self.current_col]
         self.current_selection.set_current_selection()
     
+    def _check_correctness(self,word):
+
+        
+
+        counts_letters = Counter(self.word_to_guess)
+
+        for i,(guessed_letter,true_letter) in enumerate(zip(word,self.word_to_guess)):
+            if guessed_letter == true_letter:
+                self.board[self.current_row][i].set_color(GREEN)
+                counts_letters[true_letter] -= 1
+            elif guessed_letter not in self.word_to_guess:
+                self.board[self.current_row][i].set_color(LIGHT_RED)
+            elif guessed_letter in self.word_to_guess:
+                if counts_letters[guessed_letter] != 0:
+                    self.board[self.current_row][i].set_color(YELLOW)
+                    counts_letters[guessed_letter] -= 1
+                else:
+                    self.board[self.current_row][i].set_color(LIGHT_RED)
+
+        
+        
+
+
+
+        
+
+
+
     def _check_word_typed(self):
+
+        # check which letters are correct if any and change the background color of each square
         self.show_text = True
         skip = False
         if not all(value for value in self.word_typed):
@@ -128,6 +161,9 @@ class Game:
             word = ''.join(self.word_typed)
 
             if word in self.words:
+
+
+                self._check_correctness(word)
 
                 if word == self.word_to_guess:
                     print('correct')
@@ -146,7 +182,7 @@ class Game:
                     self.current_row = self.current_row + 1
                     self.word_typed = [None] * 5
                     self.current_col = 0
-                    self._switch_selection()
+                    self._switch_selection(unset=False)
                     text_type = 'TRY AGAIN'
             else:
                 text_type = 'INVALID WORD'
@@ -155,6 +191,7 @@ class Game:
         if not skip:
             pygame.time.set_timer(self.TEXT_EVENT,self.TEXT_DISPLAY_TIME,1)
     
+
     def play(self):
         while True:
 
