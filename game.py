@@ -66,8 +66,10 @@ class Game:
         self.submit_button.sprite.set_original()
         self.game_over = False
         self.text = None
+        self.word_typed = [None] * self.word_length
 
         self._choose_random_word()
+        self._create_text()
         self.current_row =self.current_col =  0
         self._switch_selection()
     def _choose_random_word(self):
@@ -171,12 +173,14 @@ class Game:
                 else:
                     print('incorrect')
                     if self.current_row + 1 ==self.guesses:
+
                         text_type = f'WORD WAS {self.word_to_guess.upper()}'
-                        print('here')
                         self.game_over = True
                         skip = True
-            
                 
+                if self.game_over:
+                    self.current_selection.unset_selection()
+
                 
                 if not skip:
                     self.current_row = self.current_row + 1
@@ -222,10 +226,11 @@ class Game:
                         elif event.key == pygame.K_BACKSPACE:
                             self.current_selection.delete()
                             self.word_typed[self.current_col] = None
-                            arrow = True
+                            arrow = True  
                             direction = -1
                             backspace = True
                         elif event.key == pygame.K_RETURN:
+                            print(self.word_typed)
                             self._check_word_typed()
                             if self.game_over:
                                 self.submit_button.sprite.set_text("PLAY AGAIN")
@@ -244,11 +249,16 @@ class Game:
                         self.current_selection.set_current_selection()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     point = pygame.mouse.get_pos()
-                    if self.submit_button.sprite.clicked_on(point):
-                        self._check_word_typed()
-                        if self.game_over:
-                            self.submit_button.sprite.set_text("PLAY AGAIN")
+                    if not self.game_over:
+                        if self.submit_button.sprite.clicked_on(point):
+                            self._check_word_typed()
+                            if self.game_over:
+                                self.submit_button.sprite.set_text("PLAY AGAIN")
 
+                    else:
+                        if self.submit_button.sprite.clicked_on(point):
+                            self.submit_button.sprite.set_text("SUBMIT")
+                            self._reset()
 
                     
 

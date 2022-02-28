@@ -23,7 +23,7 @@ class Button(pygame.sprite.Sprite):
     
     def set_original(self):
         self.image.fill(self.button_color)
-        self.image.blit(self.original_text,(self.image.get_width()//2 - text.get_width()//2,self.image.get_height()//2 - text.get_height()//2))
+        self.image.blit(self.original_text,(self.image.get_width()//2 - self.original_text.get_width()//2,self.image.get_height()//2 - self.original_text.get_height()//2))
     
     def get_bottom(self):
         return self.rect.bottom

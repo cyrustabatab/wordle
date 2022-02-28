@@ -55,7 +55,9 @@ class Square(pygame.sprite.Sprite):
         
         if self.text:
             self.text = None
-            self.image.fill(self.SQUARE_COLOR)
+        self.image.fill(self.SQUARE_COLOR)
+        self.current_selection = False
+
 
     def set_current_selection(self):
         self.current_selection = True
