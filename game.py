@@ -39,6 +39,7 @@ class Game:
         self._load_words()
         self._choose_random_word()
         self.word_to_guess = 'ZIICC'
+        self.timer = False
         print(self.word_to_guess)
         self._create_text()
         self.show_text = False
@@ -192,7 +193,9 @@ class Game:
                 text_type = 'INVALID WORD'
             
         self.text,self.text_rect = self.text_renders[text_type]
+        self.timer = False
         if not skip:
+            self.timer = True
             pygame.time.set_timer(self.TEXT_EVENT,self.TEXT_DISPLAY_TIME,1)
     
 
@@ -204,8 +207,9 @@ class Game:
                     pygame.quit()
                     sys.exit()
                 if self.text and event.type == self.TEXT_EVENT:
+                    self.timer = False
                     self.text = None
-                elif event.type == pygame.KEYDOWN:
+                elif not self.timer and event.type == pygame.KEYDOWN:
                     arrow = backspace = False
                     
                     if not self.game_over:
